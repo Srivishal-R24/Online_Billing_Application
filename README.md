@@ -21,7 +21,7 @@ Login:
 <img width="1920" height="1080" alt="Screenshot (127)" src="https://github.com/user-attachments/assets/838efa4c-b011-4b4c-b19e-eb56804692b2" />
 <img width="1920" height="1080" alt="Screenshot (128)" src="https://github.com/user-attachments/assets/685e9eb8-da40-4d97-88b4-0c11de5350b0" />
 Bill receipt:
-<img width="404" height="308" alt="Screenshot 2026-04-16 194138" src="https://github.com/user-attachments/assets/ddf96584-5a24-45e7-b7df-3541c6923504" />
+<img width="383" height="448" alt="Screenshot 2026-04-17 101126" src="https://github.com/user-attachments/assets/b74a8c2f-5f5d-4ec5-86a7-bae6d8dc764c" />
 
 ## 🛠️ Tech Stack
 
