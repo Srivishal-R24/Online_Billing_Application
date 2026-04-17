@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> Sri Online Billing System</title>
+<link rel="icon" type="image/png" href="image/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+/* ✅ DYNAMIC MOVING BACKGROUND */
+:root {
+    --bg-color: #0f172a;
+    --primary: #6366f1;
+    --secondary: #a855f7;
+    --success: #10b981;
+    --danger: #ef4444;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--bg-color);
+    overflow-x: hidden;
+    position: relative;
+    color: white;
+}
+
+/* ✅ AUTH BUTTONS */
+.auth-nav {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+
+.auth-btn {
+    padding: 8px 18px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.auth-btn.primary-auth { background: var(--primary); border: none; }
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-card {
+    background: rgba(30, 41, 59, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 30px;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+body::before, body::after {
+    content: "";
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: linear-gradient(var(--primary), var(--secondary));
+    filter: blur(80px);
+    z-index: -1;
+    opacity: 0.35;
+    animation: move 25s infinite alternate ease-in-out;
+}
+
+@keyframes move {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(80vw, 80vh) scale(1.3); }
+}
+
+h1 { text-align: center; color: white; margin-bottom: 20px; margin-top: 40px; }
+
+.card {
+    width: 100%;
+    max-width: 550px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(25px);
+    padding: 25px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    margin-bottom: 20px;
+}
+
+.mode-switch { display: flex; justify-content: space-between; margin-bottom: 20px; background: rgba(0, 0, 0, 0.3); border-radius: 14px; padding: 5px; }
+.mode-switch button { flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; background: transparent; color: #94a3b8; font-weight: 600; }
+.mode-switch .active { background: white; color: var(--bg-color); }
+
+input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; outline: none; box-sizing: border-box; }
+select option { background: var(--bg-color); color: white; }
+
+.add-btn { background: var(--success); color: white; padding: 14px; width: 100%; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; margin-top: 5px; transition: 0.3s; }
+.add-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+table { width: 100%; margin-top: 10px; border-collapse: collapse; }
+th, td { padding: 12px 8px; text-align: center; color: white; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+th { background: rgba(0,0,0,0.4); text-transform: uppercase; font-weight: 600; }
+
+.remove-btn { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; }
+
+.total-box { margin-top: 20px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 18px; }
+.total-box div { display: flex; justify-content: space-between; margin-bottom: 5px; color: #cbd5e1; }
+.grand { font-weight: 600; font-size: 20px; color: white; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; }
+
+.action-buttons { display: flex; gap: 10px; margin-top: 20px; }
+.action-buttons button { flex: 1; padding: 12px; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; color: white; }
+.save-btn { background: var(--primary); }
+.print-btn { background: #8b5cf6; }
+
+.history-item { background: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); }
+.history-actions { display: flex; gap: 8px; margin-top: 10px; }
+.history-btn { padding: 6px 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 600; }
+.edit-h-btn { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; }
+.print-h-btn { background: rgba(139, 92, 246, 0.2); color: #a78bfa; border: 1px solid #8b5cf6; }
+.del-h-btn { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
+
+.auth-footer { margin-top: 15px; text-align: center; font-size: 13px; color: #94a3b8; }
+.auth-link { color: var(--primary); cursor: pointer; text-decoration: underline; }
+
+/* ✅ MINI PRINTER (58mm) OPTIMIZATION */
+@media print {
+    @page { size: 80mm auto; margin: 0; }
+    body { background: white !important; color: black !important; padding: 4mm; width: 58mm; display: block; }
+    body::before, body::after, .auth-nav, .no-print, .action-buttons, .mode-switch, .history-toggle-btn, h1 { display: none !important; }
+    .card { background: white !important; border: none; box-shadow: none; width: 100% !important; padding: 0; margin: 0; }
+    th, td { color: black !important; border-bottom: 1px solid #000; font-size: 9px; padding: 3px 1px; }
+    th { background: #f0f0f0 !important; }
+    .print-cust-info { display: block !important; margin-bottom: 8px; color: black; font-size: 10px; line-height: 1.4; border-bottom: 1px dashed black; padding-bottom: 5px; }
+    .total-box { background: transparent !important; padding: 5px 0; border-top: 1px solid black; }
+    .total-box div { color: black !important; font-size: 9px; }
+    .grand { font-size: 11px !important; border-top: 1px dashed black; }
+}
+@media print {
+    /* ... your existing print styles ... */
+    
+    .total-box {
+        border-top: 1px solid black;
+        margin-top: 10px;
+    }
+
+    /* Ensure the footer added in JS is visible during print */
+    .total-box p {
+        color: black !important;
+        text-align: center;
+    }
+}
+
+.print-cust-info { display: none; }
+</style>
+</head>
+
+<body>
+
+    <div class="auth-nav no-print">
+        <button class="auth-btn" onclick="openModal('loginModal')">Login</button>
+        <button class="auth-btn primary-auth" onclick="openModal('regModal')">Register</button>
+    </div>
+
+    <div id="loginModal" class="modal-overlay" onclick="closeModal(event, 'loginModal')">
+        <div class="modal-card" id="loginContent">
+            <h2 style="text-align:center;">Login</h2>
+            <input type="text" placeholder="Username or Email">
+            <input type="password" placeholder="Password">
+            <button class="add-btn" style="background:var(--primary)">Login</button>
+            <div class="auth-footer">
+                <span class="auth-link" onclick="showForget()">Forgot Password?</span>
+            </div>
+        </div>
+        <div class="modal-card" id="forgetContent" style="display:none;">
+            <h2 style="text-align:center;">Reset Password</h2>
+            <p style="font-size: 12px; color:#94a3b8; text-align:center;">Enter your registered email to receive a reset link.</p>
+            <input type="email" placeholder="Enter Registered Email">
+            <button class="add-btn" style="background:var(--secondary)">Send Reset Link</button>
+            <div class="auth-footer">
+                <span class="auth-link" onclick="showLogin()">Back to Login</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="regModal" class="modal-overlay" onclick="closeModal(event, 'regModal')">
+        <div class="modal-card" style="max-width: 450px;">
+            <h2 style="text-align:center;">Create Account</h2>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" placeholder="Full Name">
+                <input type="text" placeholder="Username">
+            </div>
+            <input type="email" placeholder="Email Address">
+            <input type="text" placeholder="Store/Business Name">
+            <div style="display: flex; gap: 10px;">
+                <input type="tel" placeholder="Phone Number">
+                <select>
+                    <option value="">Business Type</option>
+                    <option value="retail">Retail</option>
+                    <option value="wholesale">Wholesale</option>
+                    <option value="service">Service</option>
+                </select>
+            </div>
+            <input type="password" placeholder="Password">
+            <input type="password" placeholder="Confirm Password">
+            <button class="add-btn">Register Store</button>
+            <div class="auth-footer">
+                Already have an account? <span class="auth-link" onclick="openModal('loginModal')">Login here</span>
+            </div>
+        </div>
+    </div>
+
+    <h1 class="no-print">🛒 Sri Online Billing System</h1>
+
+    <div class="card no-print">
+        <div class="mode-switch">
+            <button id="scanBtn" class="active">Barcode Scan</button>
+            <button id="customBtn">Manual Entry</button>
+        </div>
+
+        <div id="scanSection">
+            <input type="text" id="barcode" placeholder="📷 Scan Barcode" autofocus onkeypress="if(event.key === 'Enter') addCustom()">
+            <button class="add-btn" onclick="addCustom()">+ Add to Cart</button>
+        </div>
+
+        <div id="customSection" style="display: none;">
+            <input type="text" id="cname" placeholder="📦 Product Name">
+            <input type="number" id="cprice" placeholder="💲 Price (₹)">
+            <input type="number" id="cqty" placeholder="🔢 Quantity">
+            <button class="add-btn" onclick="addCustom()">+ Add to Cart</button>
+        </div>
+
+        <div class="customer-info">
+            <input type="text" id="custName" placeholder="👤 Customer Name">
+            <input type="text" id="custPhone" placeholder="📞 Phone Number">
+            <select id="billDiscount" onchange="render()">
+        <option value="0">🏷️ No Discount (0%)</option>
+        <option value="5">5% Discount</option>
+        <option value="10">10% Discount</option>
+        <option value="15">15% Discount</option>
+        <option value="20">20% Discount</option>
+        <option value="25">25% Discount</option>
+        <option value="30">30% Discount</option>
+        <option value="40">40% Discount</option>
+        <option value="50">50% Discount</option>
+        <option value="60">60% Discount</option>
+        <option value="70">70% Discount</option>
+        <option value="80">80% Discount</option>
+        <option value="90">90% Discount</option>
+        <option value="100">100% (FREE)</option>
+    </select>
+        </div>
+    </div>
+
+    <div class="card billing-card">
+        <div class="print-cust-info" id="printCustBox"></div>
+        <table id="mainTable">
+            <thead>
+                <tr>
+                    <th style="text-align: left;">Item</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                    <th class="no-print">X</th>
+                </tr>
+            </thead>
+            <tbody id="billTable"></tbody>
+        </table>
+
+        <div class="total-box">
+            <div><span>Subtotal</span><span id="subtotal">₹0.00</span></div>
+            <div><span>Discount</span><span id="discount">₹0.00</span></div>
+            <div class="grand"><span>Net Total</span><span id="total">₹0.00</span></div>
+        </div>
+
+        <div class="action-buttons no-print">
+            <button class="save-btn" onclick="saveBill()">💾 Save Bill</button>
+            <button class="print-btn" onclick="printBill()">🧾 Print</button>
+        </div>
+    </div>
+
+    
+    <div class="card no-print">
+    <div style="display: flex; gap: 10px;">
+        <button class="history-toggle-btn" onclick="toggleHistory()" style="flex: 3; background: rgba(255,255,255,0.1); color: white; border: none; padding: 10px; border-radius: 10px; cursor: pointer;">📜 Show Saved History</button>
+        <button id="clearAllBtn" onclick="clearAllHistory()" style="flex: 1; background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; padding: 10px; border-radius: 10px; cursor: pointer; font-weight: 600; display: none;">🧹 Clear All</button>
+    </div>
+    
+    <div id="historyContent" style="display:none; margin-top:20px;">
+        <div id="historyList"></div>
+    </div>
+</div>
+
+<script>
+let bill = [];
+let savedBillsHistory = JSON.parse(localStorage.getItem('billingHistory')) || [];
+
+window.onload = () => { renderHistory(); };
+
+// --- AUTH UI FUNCTIONS ---
+function showForget() {
+    document.getElementById('loginContent').style.display = 'none';
+    document.getElementById('forgetContent').style.display = 'block';
+}
+
+function showLogin() {
+    document.getElementById('loginContent').style.display = 'block';
+    document.getElementById('forgetContent').style.display = 'none';
+}
+
+function openModal(id) { 
+    document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+    document.getElementById(id).style.display = 'flex'; 
+    showLogin(); 
+}
+
+function closeModal(e, id) { 
+    if (e.target.className === 'modal-overlay') document.getElementById(id).style.display = 'none'; 
+}
+
+// --- UI CONTROLS ---
+const scanBtn = document.getElementById("scanBtn");
+const customBtn = document.getElementById("customBtn");
+const scanSection = document.getElementById("scanSection");
+const customSection = document.getElementById("customSection");
+
+scanBtn.onclick = () => {
+    scanBtn.classList.add("active"); customBtn.classList.remove("active");
+    scanSection.style.display = "block"; customSection.style.display = "none";
+    document.getElementById("barcode").focus();
+};
+
+customBtn.onclick = () => {
+    customBtn.classList.add("active"); scanBtn.classList.remove("active");
+    scanSection.style.display = "none"; customSection.style.display = "block";
+};
+
+function addCustom() {
+    let n = document.getElementById("cname"), p = document.getElementById("cprice"), q = document.getElementById("cqty");
+    if (!n.value || !p.value || !q.value) return alert("Fill all fields");
+    addToBill({ name: n.value, price: parseFloat(p.value), qty: parseInt(q.value) });
+    n.value = ""; p.value = ""; q.value = "";
+}
+
+function addToBill(product) {
+    let existing = bill.find(p => p.name === product.name);
+    if (existing) existing.qty += product.qty;
+    else bill.push(product);
+    render();
+}
+
+function removeItem(i) { bill.splice(i, 1); render(); }
+
+function render() {
+    let tbody = document.getElementById("billTable");
+    tbody.innerHTML = "";
+    let subtotal = 0;
+    bill.forEach((item, i) => {
+        let itemTotal = item.price * item.qty;
+        subtotal += itemTotal;
+        tbody.innerHTML += `<tr>
+            <td style="text-align: left;">${item.name}</td>
+            <td>${item.price.toFixed(0)}</td>
+            <td>${item.qty}</td>
+            <td>${itemTotal.toFixed(0)}</td>
+            <td class="no-print"><button class="remove-btn" onclick="removeItem(${i})">X</button></td>
+        </tr>`;
+    });
+    
+    let discPercent = parseFloat(document.getElementById("billDiscount").value) || 0;
+    let discountAmount = (subtotal * discPercent) / 100;
+    let total = subtotal - discountAmount;
+
+    document.getElementById("subtotal").innerText = "₹" + subtotal.toFixed(2);
+    document.getElementById("discount").innerText = "₹" + discountAmount.toFixed(2) + " (" + discPercent + "%)";
+    document.getElementById("total").innerText = "₹" + Math.max(0, total).toFixed(2);
+}
+
+// --- UPDATED SAVE AND HISTORY LOGIC ---
+
+function saveBill() {
+    if (bill.length === 0) return alert("Empty Cart!");
+    
+    let sub = 0; 
+    bill.forEach(i => sub += i.price * i.qty);
+    let discPercent = parseFloat(document.getElementById("billDiscount").value) || 0;
+    
+    // Create detailed record
+    let billRecord = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        customerName: document.getElementById("custName").value || "Walk-in Customer",
+        customerPhone: document.getElementById("custPhone").value || "No Phone Provided",
+        subtotal: sub.toFixed(2),
+        discount: discPercent,
+        total: (sub - (sub * discPercent / 100)).toFixed(2),
+        items: [...bill]
+    };
+
+    savedBillsHistory.push(billRecord);
+    localStorage.setItem('billingHistory', JSON.stringify(savedBillsHistory));
+    
+    alert(`Bill Saved Successfully for ${billRecord.customerName}!`);
+    
+    // Reset Fields
+    bill = []; 
+    document.getElementById("custName").value = "";
+    document.getElementById("custPhone").value = "";
+    document.getElementById("billDiscount").value = "0";
+    
+    render(); 
+    renderHistory();
+}
+
+function renderHistory() {
+    let list = document.getElementById("historyList");
+    list.innerHTML = savedBillsHistory.length ? "" : '<p style="text-align:center">No saved history found.</p>';
+    
+    // Sort history to show newest first
+    [...savedBillsHistory].reverse().forEach(record => {
+        list.innerHTML += `
+            <div class="history-item">
+                <div style="display:flex; justify-content:space-between; align-items: flex-start; margin-bottom: 8px;">
+                    <div>
+                        <strong style="color: var(--primary); font-size: 14px;">👤 ${record.customerName}</strong><br>
+                        <span style="font-size: 11px; color: #94a3b8;">📞 ${record.customerPhone}</span>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="font-weight: 600; font-size: 16px;">₹${record.total}</span><br>
+                        <span style="font-size: 10px; color: #94a3b8;">📅 ${record.date} | 🕒 ${record.time}</span>
+                    </div>
+                </div>
+                <div class="history-actions">
+                    <button class="history-btn edit-h-btn" onclick="editHistory(${record.id})">✏️ Edit</button>
+                    <button class="history-btn print-h-btn" onclick="printSaved(${record.id})">🖨️ Print</button>
+                    <button class="history-btn del-h-btn" onclick="deleteHistory(${record.id})">🗑️ Delete</button>
+                </div>
+            </div>`;
+    });
+}
+
+function editHistory(id) {
+    const record = savedBillsHistory.find(r => r.id === id);
+    if(!record) return;
+    bill = JSON.parse(JSON.stringify(record.items));
+    document.getElementById("custName").value = record.customerName === "Walk-in Customer" ? "" : record.customerName;
+    document.getElementById("custPhone").value = record.customerPhone === "No Phone Provided" ? "" : record.customerPhone;
+    document.getElementById("billDiscount").value = record.discount;
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function printSaved(id) {
+    const r = savedBillsHistory.find(rec => rec.id === id);
+    if(!r) return;
+
+    // Construct the printable content
+    document.getElementById("printCustBox").innerHTML = `
+        <div style="text-align:center; border-bottom: 1px dashed #000; margin-bottom: 10px; padding-bottom: 10px;">
+            <h1 style="margin:0; font-size: 18px; text-transform: uppercase;">Sri Online Billing System</h1>
+            <p style="margin:2px 0; font-size: 10px; color: #555;">Sri Online Billing System</p>
+        </div>
+
+        <div style="font-size: 11px; margin-bottom: 10px; line-height: 1.4;">
+            <b>Customer:</b> ${r.customerName}<br>
+            <b>Phone:</b> ${r.customerPhone}<br>
+            <b>Date:</b> ${r.date} | <b>Time:</b> ${r.time}
+        </div>
+
+        <div id="print-footer" style="display:none;">
+            <div style="width: 100%; margin-top: 20px; border-top: 1px dashed #000; padding-top: 10px;">
+        <p style="text-align: center; font-weight: 600; font-size: 14px; margin: 0;">
+            Thank you! See you again!
+        </p>
+        </div>
+    `;
+
+    // Load items and render the table
+    bill = [...r.items]; 
+    document.getElementById("billDiscount").value = r.discount;
+    render();
+
+    // Move the footer content to the bottom of the total box for the print view
+    const footer = document.querySelector('#print-footer').innerHTML;
+    const totalBox = document.querySelector('.total-box');
+    
+    // We append the footer temporarily for the print process
+    const originalTotalContent = totalBox.innerHTML;
+    totalBox.innerHTML += footer;
+
+    // Print
+    setTimeout(() => { 
+        window.print(); 
+        // Reset the total box so the "Thank you" doesn't stay on the screen
+        totalBox.innerHTML = originalTotalContent;
+    }, 300);
+}
+
+function printBill() {
+    if (bill.length === 0) return alert("Nothing to print!");
+    let name = document.getElementById("custName").value || "Walk-in Customer";
+    let phone = document.getElementById("custPhone").value || "N/A";
+    let now = new Date();
+    document.getElementById("printCustBox").innerHTML = `
+        <b>Customer:</b> ${name}<br>
+        <b>Phone:</b> ${phone}<br>
+        <b>Date:</b> ${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+    `;
+    window.print();
+}
+
+function deleteHistory(id) {
+    if(confirm("Are you sure you want to delete this bill record?")) {
+        savedBillsHistory = savedBillsHistory.filter(r => r.id !== id);
+        localStorage.setItem('billingHistory', JSON.stringify(savedBillsHistory));
+        renderHistory();
+    }
+}
+
+function toggleHistory() {
+    let c = document.getElementById("historyContent");
+    c.style.display = c.style.display === "none" ? "block" : "none";
+}
+
+// Function to delete everything
+function clearAllHistory() {
+    if (savedBillsHistory.length === 0) return alert("History is already empty!");
+    
+    if (confirm("⚠️ Are you sure? This will permanently delete ALL saved bills!")) {
+        savedBillsHistory = []; // Clear the array
+        localStorage.removeItem('billingHistory'); // Clear local storage
+        renderHistory(); // Refresh the list
+        alert("All history cleared!");
+    }
+}
+
+// Updated toggle function to handle the Clear All button visibility
+function toggleHistory() {
+    let c = document.getElementById("historyContent");
+    let clearBtn = document.getElementById("clearAllBtn");
+    
+    if (c.style.display === "none") {
+        c.style.display = "block";
+        clearBtn.style.display = "block"; // Show clear button when history is open
+    } else {
+        c.style.display = "none";
+        clearBtn.style.display = "none"; // Hide clear button when history is closed
+    }
+}
+
+
+
+// 1. ADD THIS: A simple database to map barcodes to products
+const productDatabase = {
+    "12345": { name: "Apple Juice", price: 50 },
+    "67890": { name: "Biscuits", price: 20 },
+    "11223": { name: "Milk 1L", price: 65 }
+};
+
+// 2. UPDATED: Modified addCustom to handle both Manual and Barcode logic
+function addCustom() {
+    const isBarcodeMode = document.getElementById("scanSection").style.display !== "none";
+
+    if (isBarcodeMode) {
+        // --- Barcode Logic ---
+        let barcodeInput = document.getElementById("barcode");
+        let code = barcodeInput.value.trim();
+        
+        if (!code) return alert("Please scan or enter a barcode first!");
+
+        let product = productDatabase[code];
+        
+        if (product) {
+            addToBill({ name: product.name, price: product.price, qty: 1 });
+            barcodeInput.value = ""; // Clear input for next scan
+            barcodeInput.focus();
+        } else {
+            alert("Product not found in database! Try Manual Entry.");
+        }
+    } else {
+        // --- Manual Entry Logic ---
+        let n = document.getElementById("cname"), 
+            p = document.getElementById("cprice"), 
+            q = document.getElementById("cqty");
+            
+        if (!n.value || !p.value || !q.value) return alert("Fill all fields");
+        
+        addToBill({ 
+            name: n.value, 
+            price: parseFloat(p.value), 
+            qty: parseInt(q.value) 
+        });
+        
+        n.value = ""; p.value = ""; q.value = "";
+    }
+}
+
+// Ensure addToBill remains standard
+function addToBill(product) {
+    let existing = bill.find(p => p.name === product.name);
+    if (existing) {
+        existing.qty += product.qty;
+    } else {
+        bill.push(product);
+    }
+    render();
+}
+</script>
+</body>
+</html>
